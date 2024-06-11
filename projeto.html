@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>🏡 Imobiliária São Jorge - Programação de Scripts</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <script type="text/javascript" src="vue.min.js"></script>
+    <script type="text/javascript" src="jquery-3.7.1.min.js"></script>
+    <style>
+        body {
+            background-color: #57575ee3;
+        }
+        .navbar-brand {
+            text-align: center;
+            width: 100%;
+        }
+        header {
+            display: flex;
+            justify-content: center;
+        }
+        footer p {
+            text-align: center;
+            width: 100%;
+            margin-top: 6px;
+        }
+        #lastFooter {
+            padding-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <center>🏡 Imobiliária São Jorge - Projeto Programação de Scripts</center>
+            </a>
+        </div>
+    </nav>
+    <header>
+        <img src="banner.png" class="img-fluid" alt="logo" />
+    </header>
+    <main class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <center><p class="lead" style="color:#f7f7f7">Cadastrar novo imóvel</p></center>
+                <input type="number" class="form-control mb-3" placeholder="Código" v-model="codigo" />
+                <input type="text" class="form-control mb-3" placeholder="Nome" v-model="nomeImov" />
+                <input type="text" class="form-control mb-3" placeholder="Cidade" v-model="cidade" />
+                <input type="text" class="form-control mb-3" placeholder="Bairro" v-model="bairro" />
+                <select class="form-control mb-3" v-model="tipo">
+                    <option disabled value="">Tipo: Locação ou venda?</option>
+                    <option value="Locação">Locação</option>
+                    <option value="Venda">Venda</option>
+                </select>
+                <input type="number" class="form-control mb-3" placeholder="Valor em Reais (R$)" v-model="valor"/>
+                <p> {{ nomeImov }} </p>
+                <div v-if="codigo != '' && cidade != '' && bairro != '' && tipo != ''">
+                    <center><button class="btn btn-primary" @click="salvar">Salvar</button></center>
+                </div>
+                <div v-else>
+                    <center><button class="btn btn-secondary" disabled>Salvar</button></center>
+                </div>
+                <center><button class="btn btn-danger mt-3" @click='carregarDados'>AJAX</button></center>
+                <center><p>Hora: {{hora}}</p></center>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <center><p class="lead" style="color:#f7f7f7">Listagem de imóveis cadastrados</p></center>
+                    <table class="table table-striped table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">Código</th>
+                                <th scope="col">Nome</th>
+                                <th scope="col">Cidade</th>
+                                <th scope="col">Bairro</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Valor</th>
+                                <th scope="col">Alterar</th>
+                                <th scope="col">Excluir</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in listaImoveis" :key="index">
+                                <td>{{ item.codigo }}</td>
+                                <td>{{ item.nomeImov }}</td>
+                                <td>{{ item.cidade }}</td>
+                                <td>{{ item.bairro }}</td>
+                                <td>{{ item.tipo }}</td>
+                                <td>{{ item.valor }}</td>
+                                <td>
+                                    <button class="btn btn-warning" @click="alterar(index)">Alterar</button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger" @click="excluir(index)">Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </table>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Desenvolvido por Jota / José Guilherme Pandolfi</p>
+        <p id="lastFooter">Desenvolvido para a disciplina de Programação de Scripts - Análise e Desenvolvimento de Sistemas - Fatec Taquaritinga</p>
+    </footer>
+    <script type="text/javascript">
+        class imovel {
+            constructor(codigo, nomeImov, cidade, bairro, tipo, valor) {
+                this.codigo = codigo;
+                this.nomeImov = nomeImov;
+                this.cidade = cidade;
+                this.bairro = bairro;
+                this.tipo = tipo;
+                this.valor = valor;
+            }
+        }
+
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    codigo: '',
+                    nomeImov: '',
+                    cidade: '',
+                    bairro: '',
+                    tipo: '',
+                    valor: '',
+                    hora: '00:00:00',
+                    posicao: -1,
+                    listaImoveis: []
+                }
+            },
+            methods: {
+                salvar: function () {
+                    if (this.posicao === -1) {
+                        this.listaImoveis.push(new imovel(this.codigo, this.nomeImov, this.cidade, this.bairro, this.tipo, this.valor));
+                    } else {
+                        Vue.set(this.listaImoveis, this.posicao, new imovel(this.codigo, this.nomeImov, this.cidade, this.bairro, this.tipo, this.valor));
+                        this.posicao = -1;
+                    }
+                    this.limpar();
+                },
+
+                alterar: function (index) {
+                    this.codigo = this.listaImoveis[index].codigo;
+                    this.nomeImov = this.listaImoveis[index].nomeImov;
+                    this.cidade = this.listaImoveis[index].cidade;
+                    this.bairro = this.listaImoveis[index].bairro;
+                    this.tipo = this.listaImoveis[index].tipo;
+                    this.valor = this.listaImoveis[index].valor;
+                    this.posicao = index;
+                },
+
+                excluir: function (index) {
+                    if (confirm('Tem certeza que deseja excluir o imóvel selecionado?')) {
+                        this.listaImoveis.splice(index, 1);
+                    }
+                },
+
+                limpar: function () {
+                    this.nomeImov = '';
+                    this.codigo = '';
+                    this.cidade = '';
+                    this.bairro = '';
+                    this.tipo = '';
+                    this.valor = '';
+                },
+
+                carregarDados: function () {
+                    $.ajax({
+                        url: 'http://date.jsontest.com/',
+                        method: 'GET',
+                        contentType: 'text/plain',
+                        complete: (res) => {
+                            let dados = JSON.parse(res.responseText);
+                            app.$data.hora = dados.time;
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</div>
+</body>
+</html>
